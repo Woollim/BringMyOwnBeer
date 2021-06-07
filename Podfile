@@ -1,44 +1,24 @@
-# Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '13.0'
 
-target 'BringMyOwnBeer🍺' do
-  # Comment the next line if you don't want to use dynamic frameworks
-  use_frameworks!
+use_frameworks!
+inhibit_all_warnings!
 
-  # Pods for BringMyOwnBeer🍺
-  # RxSwift + Dependencies
-  pod 'RxSwift', '~> 4.4.0'
-  pod 'RxCocoa', '~> 4.4.0'
-  pod 'RxOptional', '~> 3.6.2'
-  pod 'RxKeyboard', '~> 0.9.0'
-  pod 'RxAppState'
-  pod 'RxDataSources', '~> 3.1.0'
+def pods
+  pod 'RxSwift', '~> 6'
+  pod 'RxCocoa', '~> 6'
+  pod 'RxViewController'
+  pod 'RxKeyboard'
+  pod 'ReactorKit', '~> 3'
 
-  # Image + Animation + UI
-  pod 'Kingfisher', '~> 4.10.1'
-  pod 'Toaster', '~> 2.1.0'
-  pod 'SnapKit', '~> 4.2.0'
+  pod 'SnapKit', '~> 5'
+  pod 'Then'
+  pod 'Toaster', '~> 2.3'
+  pod 'SDWebImage', '~> 5.11'
 
-  # Other Swift Utilities
-  pod 'Then', '~> 2.4.0'
-
-def testing_pods
-  pod 'Quick', '~> 1.3.1'
-  pod 'Nimble', '~> 8.0.0'
-  pod 'RxBlocking', '~> 4.0'
-  pod 'RxTest',     '~> 4.0'
+  pod 'SwiftLint'
 end
 
-  target 'BringMyOwnBeer🍺Tests' do
-    inherit! :search_paths
-    # Pods for testing
-    testing_pods
-  end
-
-  target 'BringMyOwnBeer🍺UITests' do
-    inherit! :search_paths
-    # Pods for testing
-    testing_pods
-  end
-
+target 'BringMyOwnBeer🍺' do
+  pods
 end
