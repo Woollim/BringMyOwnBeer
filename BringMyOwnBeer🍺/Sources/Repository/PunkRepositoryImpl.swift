@@ -30,30 +30,33 @@ class PunkRepositoryImpl: PunkRepository {
             }
     }
 
-    func getBeer(id: String) -> Observable<Result<[Beer], PunkError>> {
+    func getBeer(id: String) -> Single<Result<Beer, PunkError>> {
 
         guard let url = URL(string: PunkAPI.baseURL + "/beers/\(id)") else {
             return .just(.failure(.defaultError))
         }
 
         return session.rx.data(request: URLRequest(url: url))
+            .asSingle()
             .map { data in
                 do {
-                    let beers = try JSONDecoder().decode([Beer].self, from: data)
-                    return .success(beers)
+                    let beerList = try JSONDecoder().decode([Beer].self, from: data)
+                    // swiftlint:disable force_unwrapping
+                    return .success(beerList.first!)
                 } catch {
                     return .failure(.error(error.localizedDescription))
                 }
             }
     }
 
-    func getRandomBeer() -> Observable<Result<Beer, PunkError>> {
+    func getRandomBeer() -> Single<Result<Beer, PunkError>> {
 
         guard let url = URL(string: PunkAPI.baseURL + "/beers") else {
             return .just(.failure(.defaultError))
         }
 
         return session.rx.data(request: URLRequest(url: url))
+            .asSingle()
             .map { data in
                 do {
                     let beers = try JSONDecoder().decode([Beer].self, from: data)

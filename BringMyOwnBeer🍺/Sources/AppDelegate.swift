@@ -6,6 +6,7 @@
 //  Copyright © 2019 Boyoung Park. All rights reserved.
 //
 
+import ReactorKit
 import UIKit
 
 @UIApplicationMain
@@ -15,12 +16,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         self.window = UIWindow()
-        let rootViewController = MainViewController()
-        let rootViewModel = MainViewModel()
-        rootViewController.bind(rootViewModel)
-
+        window?.rootViewController = HomeViewController().then {
+            $0.reactor = HomeReactor()
+        }
         window?.makeKeyAndVisible()
-        window?.rootViewController = rootViewController
         return true
     }
 }

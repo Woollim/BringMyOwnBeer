@@ -11,6 +11,6 @@ import RxSwift
 
 protocol PunkRepository {
     func getBeers(page: Int) -> Single<Result<[Beer], PunkError>>
-    func getBeer(id: String) -> Single<Result<[Beer], PunkError>>
-    func getRandomBeer() -> Single<Result<[Beer], PunkError>>
+    func getBeer(id: String) -> Single<Result<Beer, PunkError>>
+    func getRandomBeer() -> Single<Result<Beer, PunkError>>
 }

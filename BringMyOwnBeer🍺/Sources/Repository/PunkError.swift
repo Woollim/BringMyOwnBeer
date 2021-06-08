@@ -12,7 +12,7 @@ enum PunkError: Error {
     case error(String)
     case defaultError
 
-    var message: String? {
+    var message: String {
         switch self {
         case let .error(msg):
             return msg

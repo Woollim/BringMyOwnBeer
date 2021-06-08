@@ -10,8 +10,6 @@ import SnapKit
 import UIKit
 
 class BeerListCell: UITableViewCell {
-    typealias Data = (id: Int, name: String, description: String, imageURL: String)
-
     let idLabel = UILabel()
     let nameLabel = UILabel()
     let descriptionLabel = UILabel()
@@ -28,26 +26,21 @@ class BeerListCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func setData(data: Data) {
+    func setData(beer: Beer) {
         idLabel.do {
-            $0.text = "\(data.id)"
+            $0.text = beer.id.map { "\($0)" } ?? "찾지 못 함"
         }
 
         nameLabel.do {
-            $0.text = data.name
+            $0.text = beer.name
         }
 
         descriptionLabel.do {
-            $0.text = data.description
+            $0.text = beer.description
         }
 
         beerImageView.do {
-            $0.sd_setImage(with: URL(string: data.imageURL))
-            $0.snp.updateConstraints {
-                $0.top.bottom.equalToSuperview().inset(16)
-                $0.left.equalToSuperview()
-                $0.width.height.equalTo(120)
-            }
+            $0.sd_setImage(with: URL(string: beer.imageURL ?? ""))
         }
     }
 
@@ -83,27 +76,27 @@ class BeerListCell: UITableViewCell {
 
         beerImageView.snp.makeConstraints {
             $0.top.bottom.equalToSuperview().inset(16)
-            $0.left.equalToSuperview()
+            $0.leading.equalToSuperview()
             $0.width.height.equalTo(120)
         }
 
         idLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(16)
-            $0.left.equalTo(beerImageView.snp.right).offset(8)
-            $0.right.equalToSuperview().offset(-8)
+            $0.leading.equalTo(beerImageView.snp.trailing).offset(8)
+            $0.trailing.equalToSuperview().offset(-8)
         }
 
         nameLabel.snp.makeConstraints {
             $0.top.equalTo(idLabel.snp.bottom).offset(4)
-            $0.left.equalTo(idLabel)
-            $0.right.equalToSuperview().offset(-8)
+            $0.leading.equalTo(idLabel)
+            $0.trailing.equalToSuperview().offset(-8)
         }
 
         descriptionLabel.snp.makeConstraints {
             $0.top.equalTo(nameLabel.snp.bottom).offset(6).priority(1000)
             $0.bottom.lessThanOrEqualToSuperview().offset(-16).priority(800)
-            $0.left.equalTo(nameLabel)
-            $0.right.equalToSuperview().offset(-8)
+            $0.leading.equalTo(idLabel)
+            $0.trailing.equalToSuperview().offset(-8)
         }
     }
 }

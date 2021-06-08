@@ -9,5 +9,5 @@
 import Foundation
 
 enum PunkAPI {
-    static let baseURL = "https://api.punkapi.com/v2/"
+    static let baseURL = "https://api.punkapi.com/v2"
 }

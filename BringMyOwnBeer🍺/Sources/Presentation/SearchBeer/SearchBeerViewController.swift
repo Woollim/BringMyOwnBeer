@@ -1,49 +1,67 @@
 //
-//  RandomBeerViewController.swift
+//  SearchBeerViewController.swift
 //  BringMyOwnBeer🍺
 //
 //  Created by Boyoung Park on 14/06/2019.
 //  Copyright © 2019 Boyoung Park. All rights reserved.
 //
 
+import ReactorKit
 import RxCocoa
 import RxSwift
+import SDWebImage
 import UIKit
 
-typealias BeerData = BeerListCell.Data
+class SearchBeerViewController: BaseViewController, View {
 
-protocol RandomBeerViewBindable {
-    var randomButtonTapped: PublishRelay<Void> { get }
-    var selectedBeerData: Signal<BeerData> { get }
-    var errorMessage: Signal<String> { get }
-}
+    typealias Action = SearchBeerReactor.Action
 
-class RandomBeerViewController: ViewController<RandomBeerViewBindable> {
+    let searchController = UISearchController(searchResultsController: nil)
+    let loadingIndicator = UIActivityIndicatorView()
     let beerImageView = UIImageView()
     let idLabel = UILabel()
     let beerNameLabel = UILabel()
     let beerDescriptionLabel = UILabel()
-    let randomButton = UIButton()
 
-    override func bind(_ viewModel: RandomBeerViewBindable) {
-        self.disposeBag = DisposeBag()
-
-        randomButton.rx.tap
-            .bind(to: viewModel.randomButtonTapped)
+    func bind(reactor: SearchBeerReactor) {
+        reactor.state.map(\.beer)
+            .bind(onNext: { [weak self] beer in
+                self?.beerImageView.sd_setImage(with: URL(string: beer?.imageURL ?? ""))
+                self?.idLabel.text = beer?.id.map { "\($0)" } ?? "찾지 못 함"
+                self?.beerNameLabel.text = beer?.name
+                self?.beerDescriptionLabel.text = beer?.description
+            })
             .disposed(by: disposeBag)
 
-        viewModel.selectedBeerData
-            .emit(to: self.rx.setData)
+        reactor.state.map(\.showLoadingIndicator)
+            .bind(to: loadingIndicator.rx.isAnimating)
             .disposed(by: disposeBag)
 
-        viewModel.errorMessage
-            .emit(to: self.rx.toast())
+        reactor.state.map(\.toastMessage)
+            .compactMap { $0 }
+            .bind(to: self.rx.toast())
+            .disposed(by: disposeBag)
+
+        searchController.searchBar.rx.searchButtonClicked
+            .withLatestFrom(searchController.searchBar.rx.text.orEmpty)
+            .do(onNext: { [weak self] _ in
+                self?.searchController.dismiss(animated: true, completion: nil)
+            })
+            .map { Action.beerIDEntered($0) }
+            .bind(to: reactor.action)
             .disposed(by: disposeBag)
     }
 
     override func attribute() {
-        title = "아무거나 검색"
-        view.backgroundColor = .white
+        self.do {
+            $0.title = "검색"
+            $0.navigationController?.navigationBar.prefersLargeTitles = true
+            $0.navigationItem.searchController = searchController
+        }
+
+        searchController.searchBar.do {
+            $0.keyboardType = .numbersAndPunctuation
+        }
 
         idLabel.do {
             $0.font = .systemFont(ofSize: 14, weight: .light)
@@ -67,11 +85,9 @@ class RandomBeerViewController: ViewController<RandomBeerViewBindable> {
             $0.contentMode = .scaleAspectFit
         }
 
-        randomButton.do {
-            $0.setTitle("I'm Feeling Lucky", for: .normal)
-            $0.backgroundColor = self.view.tintColor
-            $0.layer.cornerRadius = 4
-            $0.clipsToBounds = true
+        loadingIndicator.do {
+            $0.color = .darkGray
+            $0.hidesWhenStopped = true
         }
     }
 
@@ -80,7 +96,7 @@ class RandomBeerViewController: ViewController<RandomBeerViewBindable> {
         view.addSubview(idLabel)
         view.addSubview(beerNameLabel)
         view.addSubview(beerDescriptionLabel)
-        view.addSubview(randomButton)
+        view.addSubview(loadingIndicator)
 
         beerImageView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(20)
@@ -104,28 +120,8 @@ class RandomBeerViewController: ViewController<RandomBeerViewBindable> {
             $0.left.right.equalToSuperview().inset(20)
         }
 
-        randomButton.snp.makeConstraints {
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-60)
-            $0.centerX.equalToSuperview()
-            $0.left.right.equalToSuperview().inset(20)
-            $0.height.equalTo(56)
-        }
-    }
-}
-
-extension Reactive where Base: RandomBeerViewController {
-    var setData: Binder<BeerListCell.Data> {
-        Binder(base) { base, data in
-            base.beerImageView.sd_setImage(with: URL(string: data.imageURL))
-            base.beerImageView.snp.remakeConstraints {
-                $0.top.equalTo(base.view.safeAreaLayoutGuide.snp.top).offset(20)
-                $0.centerX.equalToSuperview()
-                $0.width.height.equalTo(240)
-            }
-
-            base.idLabel.text = "\(data.id)"
-            base.beerNameLabel.text = data.name
-            base.beerDescriptionLabel.text = data.description
+        loadingIndicator.snp.makeConstraints {
+            $0.center.equalToSuperview()
         }
     }
 }
